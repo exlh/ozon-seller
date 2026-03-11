@@ -512,6 +512,7 @@ JSON;
             ]
         );
     }
+
     public function testInfoStocksByWarehouseFbs(): void
     {
         $data = [
@@ -528,4 +529,62 @@ JSON;
         );
     }
 
+    /**
+     * @covers ::updateDiscount
+     *
+     * @dataProvider dataUpdateDiscount
+     */
+    public function testUpdateDiscount(int $product_id, int $discount, string $request): void
+    {
+        $this->quickTest(
+            'updateDiscount',
+            [
+                $product_id,
+                $discount,
+            ],
+            [
+                'POST',
+                '/v1/product/update/discount',
+                $request,
+            ],
+            '{"result": true}'
+        );
+    }
+
+    public function dataUpdateDiscount(): iterable
+    {
+        yield [
+            1234567,
+            10,
+            '{"discount":10,"product_id":1234567}',
+        ];
+        yield [
+            9876754,
+            66,
+            '{"discount":66,"product_id":9876754}',
+        ];
+    }
+
+    /**
+     * @covers ::infoStocksByWarehouseFbs
+     *
+     * @dataProvider dataInvalidDiscount
+     */
+    public function testUpdateDiscountInvalidDiscount(int $discount): void
+    {
+        self::expectException(\InvalidArgumentException::class);
+        self::expectExceptionMessage('Discount should be between 3 and 99 percent');
+        $config = [123, 'api-key'];
+        $client = $this->createMock(ClientInterface::class);
+        $svc = new ProductService($config, $client, $this->createRequestFactory(), $this->createStreamFactory());
+        $svc->updateDiscount(123998, $discount);
+    }
+
+    public function dataInvalidDiscount(): iterable
+    {
+        yield [-1];
+        yield [1];
+        yield [2];
+        yield [100];
+    }
 }

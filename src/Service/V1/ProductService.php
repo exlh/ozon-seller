@@ -606,6 +606,8 @@ class ProductService extends AbstractService
      *
      * @see https://docs.ozon.ru/api/seller/#operation/ProductAPI_ProductStocksByWarehouseFbs
      *
+     * @deprecated use V2\ProductService::infoStocksByWarehouseFbs
+     *
      * @psalm-type TStocksQuery = array{
      *      sku?: int[],
      *      fbs_sku?: int[],
@@ -630,5 +632,26 @@ class ProductService extends AbstractService
         $query = TypeCaster::castArr($query, ['sku' => 'arrayOfString', 'fbs_sku' => 'arrayOfString']);
 
         return $this->request('POST', '/v1/product/info/stocks-by-warehouse/fbs', $query);
+    }
+
+    /**
+     * Set a discount on a markdown product.
+     *
+     * @see https://docs.ozon.ru/api/seller/en/?__rr=1&abt_att=1#operation/ProductAPI_ProductUpdateDiscount
+     *
+     * @param int $product_id Product identifier in the Ozon system
+     * @param int $discount   Discount amount: from 3 to 99 percents
+     */
+    public function updateDiscount(int $product_id, int $discount): bool
+    {
+        $query = [
+            'discount'   => $discount,
+            'product_id' => $product_id,
+        ];
+        if ($discount > 99 || $discount < 3) {
+            throw new \InvalidArgumentException('Discount should be between 3 and 99 percent');
+        }
+
+        return $this->request('POST', '/v1/product/update/discount', $query);
     }
 }
