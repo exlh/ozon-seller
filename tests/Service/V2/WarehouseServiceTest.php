@@ -139,7 +139,8 @@ class WarehouseServiceTest extends AbstractTestCase
                   ],
                   "has_next": "string"
                 }
-EOD,
+EOD
+            ,
         ];
     }
 }
