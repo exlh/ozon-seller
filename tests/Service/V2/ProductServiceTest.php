@@ -307,4 +307,49 @@ class ProductServiceTest extends AbstractTestCase
             '{"products":[{"offer_id":"PRD-1"}]}',
         ];
     }
+
+    /**
+     * @covers ::infoStocksByWarehouseFbs
+     *
+     * @dataProvider dataInfoStocksByWarehouseFbs
+     */
+    public function testInfoStocksByWarehouseFbs($query, $request): void
+    {
+        $this->quickTest(
+            'infoStocksByWarehouseFbs',
+            [
+                $query,
+            ],
+            [
+                'POST',
+                '/v2/product/info/stocks-by-warehouse/fbs',
+                $request,
+            ]
+        );
+    }
+
+    public function dataInfoStocksByWarehouseFbs(): iterable
+    {
+        yield [
+            ['limit' => 10, 'cursor' => 'string', 'sku' => ['1234567', '9876543']],
+            '{"cursor":"string","limit":10,"sku":["1234567","9876543"]}',
+        ];
+        yield [
+            ['limit' => 15, 'offer_id' => ['sku-1', '09876sku']],
+            '{"limit":15,"offer_id":["sku-1","09876sku"]}',
+        ];
+    }
+
+    /**
+     * @covers ::infoStocksByWarehouseFbs
+     */
+    public function testInfoStocksByWarehouseFbsEmptyList(): void
+    {
+        self::expectException(\InvalidArgumentException::class);
+        self::expectExceptionMessage('Non-empty list of sku or offer_id is required');
+        $config = [123, 'api-key'];
+        $client = $this->createMock(ClientInterface::class);
+        $svc = new ProductService($config, $client, $this->createRequestFactory(), $this->createStreamFactory());
+        $svc->infoStocksByWarehouseFbs(['limit' => 10]);
+    }
 }

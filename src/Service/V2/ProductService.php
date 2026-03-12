@@ -258,4 +258,51 @@ class ProductService extends AbstractService
 
         return $this->request('POST', "{$this->path}s/delete", $input);
     }
+
+    /**
+     * Receive stocks in seller's warehouses (FBS и rFBS).
+     *
+     * @see https://docs.ozon.ru/api/seller/?__rr=1&abt_att=1#operation/ProductAPI_GetProductInfoStocksByWarehouseFbsV2
+     *
+     * @psalm-type TStocksQuery = array{
+     *      cursor?: string,
+     *      limitL: int,
+     *      sku?: string[],
+     *      fbs_sku?: string[],
+     * }
+     * @psalm-type TStocks = array{
+     *      free_stock: int,
+     *      offer_id: string,
+     *      present: int,
+     *      product_id: int,
+     *      reserved: int,
+     *      warehouse_id: int,
+     *      warehouse_name: string,
+     * }
+     * @psalm-type TStocksResponse = array{
+     *      cursor: string,
+     *      has_next: bool,
+     *      products: TStocks[]
+     * }
+     *
+     * @param TStocksQuery $query
+     *
+     * @return TStocksResponse
+     */
+    public function infoStocksByWarehouseFbs(array $query): array
+    {
+        $query = ArrayHelper::pick($query, ['cursor', 'limit', 'offer_id', 'sku']);
+        $query = TypeCaster::castArr($query, [
+            'cursor'   => 'string',
+            'limit'    => 'int',
+            'offer_id' => 'arrayOfString',
+            'sku'      => 'arrayOfString',
+        ]
+        );
+        if (empty($query['offer_id']) && empty($query['sku'])) {
+            throw new \InvalidArgumentException('Non-empty list of sku or offer_id is required');
+        }
+
+        return $this->request('POST', "{$this->path}/info/stocks-by-warehouse/fbs", $query);
+    }
 }
