@@ -27,6 +27,7 @@ use Gam6itko\OzonSeller\Service\V2\ReturnsService as V2ReturnsService;
 use Gam6itko\OzonSeller\Service\V2\WarehouseService;
 use Gam6itko\OzonSeller\Service\V3\ProductService as V3ProductService;
 use Gam6itko\OzonSeller\Service\V4\ProductService as V4ProductService;
+use Gam6itko\OzonSeller\Service\V4\Posting\FbsService as V4FbsService;
 use Gam6itko\OzonSeller\Service\V5\Posting\FbsService as V5FbsService;
 use Gam6itko\OzonSeller\Service\V5\ProductService as V5ProductService;
 use Gam6itko\OzonSeller\Service\V6\Posting\FbsService as V6FbsService;
@@ -81,6 +82,8 @@ const MAPPING = [
     '/v4/product/info/prices'                        => [V4ProductService::class, 'infoPrices'],
     '/v4/product/info/stocks'                        => [V4ProductService::class, 'infoStocks'],
     '/v4/product/info/attributes'                    => [V4ProductService::class, 'infoAttributes'],
+    '/v4/posting/fbs/list'                           => [V4FbsService::class, 'list'],
+    '/v4/posting/fbs/unfulfilled/list'               => [V4FbsService::class, 'unfulfilledList'],
 
     // V5
     '/v5/fbs/posting/product/exemplar/create-or-get' => [V5FbsService::class, 'productExemplarCreateOrGet'],

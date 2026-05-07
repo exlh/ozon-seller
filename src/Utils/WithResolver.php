@@ -22,6 +22,8 @@ final class WithResolver
             case [3, PostingScheme::FBS, 'ship']:
             case [4, PostingScheme::FBS, 'ship']:
                 return ['additional_data'];
+            case [4, PostingScheme::FBS, 'list']:
+                return ['analytics_data', 'barcodes', 'financial_data', 'legal_info'];
             default:
                 return ['analytics_data', 'barcodes', 'financial_data'];
         }

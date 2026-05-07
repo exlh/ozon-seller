@@ -154,4 +154,109 @@ final class FbsServiceTest extends AbstractTestCase
             '89491381-0072-1',
         ];
     }
+
+    /**
+     * @covers ::list
+     */
+    public function testList(): void
+    {
+        $this->quickTest(
+            'list',
+            [
+                [
+                    'filter' => [
+                        'since' => '2021-08-01T00:00:00+00:00',
+                        'to'    => '2021-08-08T00:00:00+00:00',
+                    ],
+                ],
+            ],
+            [
+                'POST',
+                '/v4/posting/fbs/list',
+                '{"with":{"analytics_data":false,"barcodes":false,"financial_data":false,"legal_info":false},"filter":{"since":"2021-08-01T00:00:00+00:00","to":"2021-08-08T00:00:00+00:00"},"sort_dir":"asc","translit":true,"cursor":"","limit":10}',
+            ]
+        );
+    }
+
+    /**
+     * @covers ::list
+     */
+    public function testListFilterByStatuses(): void
+    {
+        $this->quickTest(
+            'list',
+            [
+                [
+                    'filter' => [
+                        'since'    => '2021-08-01T00:00:00+00:00',
+                        'to'       => '2021-08-08T00:00:00+00:00',
+                        'statuses' => ['awaiting_packaging', 'delivering'],
+                    ],
+                ],
+            ],
+            [
+                'POST',
+                '/v4/posting/fbs/list',
+                '{"with":{"analytics_data":false,"barcodes":false,"financial_data":false,"legal_info":false},"filter":{"since":"2021-08-01T00:00:00+00:00","to":"2021-08-08T00:00:00+00:00","statuses":["awaiting_packaging","delivering"]},"sort_dir":"asc","translit":true,"cursor":"","limit":10}',
+            ]
+        );
+    }
+
+    /**
+     * @covers ::unfulfilledList
+     */
+    public function testUnfulfilledList(): void
+    {
+        $this->quickTest(
+            'unfulfilledList',
+            [
+                [
+                    'filter' => [
+                        'cutoff_from' => '2021-11-12T00:00:00Z',
+                        'cutoff_to'   => '2021-11-13T00:00:22Z',
+                    ],
+                ],
+            ],
+            [
+                'POST',
+                '/v4/posting/fbs/unfulfilled/list',
+                '{"with":{"analytics_data":false,"barcodes":false,"financial_data":false,"legal_info":false},"filter":{"cutoff_from": "2021-11-12T00:00:00Z","cutoff_to": "2021-11-13T00:00:22Z"},"sort_dir":"asc","translit":true,"cursor":"","limit":10}',
+            ]
+        );
+    }
+
+    /**
+     * * @dataProvider invalidUnfulfilledRequest
+     */
+    public function testUnfulfilledListNoMandatoryFilter(array $methodArguments): void
+    {
+        self::expectException(\LogicException::class);
+        self::expectExceptionMessage('Not defined mandatory filter date ranges `cutoff` or `delivering_date`');
+
+        $svc = new FbsService(
+            [1, 1],
+            $this->createMock(ClientInterface::class),
+            $this->createMock(RequestFactoryInterface::class),
+            $this->createMock(StreamFactoryInterface::class)
+        );
+        $svc->unfulfilledList($methodArguments);
+    }
+
+    public function invalidUnfulfilledRequest(): iterable
+    {
+        $invalidFilters = [
+            [],
+            ['cutoff_from'          => '2021-11-12T00:00:00Z'],
+            ['cutoff_to'            => '2021-11-12T00:00:00Z'],
+            ['delivering_date_from' => '2021-11-12T00:00:00Z'],
+            ['delivering_date_to'   => '2021-11-12T00:00:00Z'],
+            ['cutoff_to'            => '2021-11-12T00:00:00Z', 'delivering_date_to' => '2021-11-12T00:00:00Z'],
+            ['cutoff_to'            => '2021-11-12T00:00:00Z', 'delivering_date_from' => '2021-11-12T00:00:00Z'],
+            ['cutoff_from'          => '2021-11-12T00:00:00Z', 'delivering_date_to' => '2021-11-12T00:00:00Z'],
+            ['cutoff_from'          => '2021-11-12T00:00:00Z', 'delivering_date_from' => '2021-11-12T00:00:00Z'],
+        ];
+        foreach ($invalidFilters as $filter) {
+            yield [['filter' => $filter]];
+        }
+    }
 }
