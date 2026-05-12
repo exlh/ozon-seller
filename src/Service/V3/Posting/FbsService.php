@@ -18,6 +18,7 @@ class FbsService extends AbstractService implements HasOrdersInterface, HasUnful
     private $path = '/v3/posting/fbs';
 
     /**
+     * @deprecated will be removed 01.06.2026 - use V4\Posting\FbsService::list
      * @see https://docs.ozon.ru/api/seller/#operation/PostingAPI_GetFbsPostingList
      */
     public function list(array $requestData = []): array
@@ -57,6 +58,9 @@ class FbsService extends AbstractService implements HasOrdersInterface, HasUnful
         return $this->request('POST', "{$this->path}/list", $requestData);
     }
 
+    /**
+     * @deprecated will be removed 01.06.2026 - use V4\Posting\FbsService::unfulfilledList
+     */
     public function unfulfilledList(array $requestData = []): array
     {
         $default = [
